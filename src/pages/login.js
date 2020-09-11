@@ -1,4 +1,5 @@
-import React, { useEffect, UseState } from 'react'
+//Importação do HOOkS
+import React, { useEffect, useState } from 'react'
 import {
   StyleSheet,
   View,
@@ -10,42 +11,49 @@ import {
   AsyncStorage,
   Alert,
 } from 'react-native'
-import api from '../services/api'
-import {useNavigation} from '@react-navigation/native'
+import { useNavigation } from '@react-navigation/native'
 
-function Login({navigation}) {
-  const [usuario, setEmail] = useState('')
+import api from '../services/api'
+
+export default function Login({ navigation }) {
+  const [usuario, setUsuario] = useState('')
   const [password, setPassword] = useState('')
 
-  useEffect(function () {
-    ;(async function () {
-      const token = await AsyncStorage.getItem('@CodeApi:token')
-      const user = Json.parse(await AsyncStorage.getItem('@CodeApi:user'))
-    })()
-  })
+  useEffect(() => {
+    (async () => {
+      const token = await AsyncStorage.getItem('@CodeApi:token');
+      const user = JSON.parse(await AsyncStorage.getItem('@CodeApi:user'));
+    })();
+  });
 
-  async function signIn(){
-  try{
-    const response = await api.post('/auth/login',{
-      usuario:usuario,
-      password:password,
-    })
-    const {token, userData} =response.data
-    await AsyncStorage.multiGet([
-      ['@CodeApi', token],
-      ['@CodeApi:user', JSON.stringify(userData)],
-    ])
-    if(userData.level === 999){
-      navigation.navigate('Adm')
-    }else if(usuario.level === 1){
-      navigation.navigate('Home')
-    }else{
-      Alert.alert('Usuário desativado!')
+  async function logar() {
+    //enviando o usuário e senha
+    try {
+      const response = await api.post('/auth/login', {
+        usuario,
+        password,
+      })
+
+      //pegando usuário e o token
+      const { user, token } = response.data
+
+      //salvando user e o token no AsyncStorage
+      await AsyncStorage.multiSet([
+        ['@CodeApi:token', token],
+        ['@CodeApi:user', JSON.stringify(user)],
+      ])
+
+      if (user.level == 1) {
+        navigation.navigate('usuario')
+      } else if (user.level == 999) {
+        navigation.navigate('administrador')
+      } else {
+        Alert.alert('Usuario desativado!')
+      }
+    } catch (err) {
+      Alert.alert('Usuario ou senha incorreta!')
     }
-  }catch(err){
-    Alert.alert('Erro')
   }
-}
 
   return (
     <SafeAreaView style={styles.screen}>
@@ -60,26 +68,28 @@ function Login({navigation}) {
           placeholder="Insira seu E-mail ou CPF"
           autoCorrect="false"
           style={styles.input}
+          onChangeText={(value) => setUsuario(value)}
         />
-
         <TextInput
           placeholder="Senha"
           autoCorrect="false"
           secureTextEntry="true"
           style={styles.input}
+          onChangeText={(value) => setPassword(value)}
         />
 
-        <TouchableOpacity style={styles.btnEntrar}>
+        <TouchableOpacity style={styles.btnEntrar} onPress={logar}>
           <Text style={styles.btnTextEntrar}>Entrar</Text>
         </TouchableOpacity>
-
-        <TouchableOpacity style={styles.btnCadastro}>
+        <TouchableOpacity
+          style={styles.btnCadastro}
+          onPress={() => navigation.navigate('cadastro')}
+        >
           <Text style={styles.btnTextCadastro}>Criar uma conta</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
   )
-}
 }
 
 const styles = StyleSheet.create({
@@ -129,5 +139,3 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
 })
-
-export default Login

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   StyleSheet,
   View,
@@ -7,9 +7,49 @@ import {
   TouchableOpacity,
   Text,
   SafeAreaView,
+  Alert,
+  AsyncStorage,
 } from 'react-native'
+import { useNavigation } from '@react-navigation/native'
 
-function Register() {
+import api from '../services/api'
+
+export default function Register({ navigation }) {
+  const [name, setName] = useState('')
+  const [cpf, setCpf] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState(null)
+
+  async function cadastrar() {
+    //enviando o formulario
+    try {
+      const response = await api.post('/auth/cadastro', {
+        name,
+        cpf,
+        email,
+        password,
+        level: 1,
+      })
+
+      const { newUser, token } = response.data
+
+
+      //salvando user e o token no AsyncStorage
+      await AsyncStorage.multiSet([
+        ['@CodeApi:token', token],
+        ['@CodeApi:user', JSON.stringify(newUser)],
+      ])
+
+      Alert.alert('Cadastrado com sucesso ')
+
+      navigation.navigate('usuario')
+    } catch (response) {
+      setError(response.data.error)
+      Alert.alert(error)
+    }
+  }
+
   return (
     <SafeAreaView style={styles.screen}>
       <View style={styles.divLogo}>
@@ -23,25 +63,37 @@ function Register() {
           placeholder="Nome"
           autoCorrect="false"
           style={styles.input}
+          onChangeText={(value) => setName(value)}
         />
 
-        <TextInput placeholder="CPF" autoCorrect="false" style={styles.input} />
+        <TextInput
+          placeholder="CPF"
+          autoCorrect="false"
+          style={styles.input}
+          onChangeText={(value) => setCpf(value)}
+        />
+
         <TextInput
           placeholder="E-mail"
           autoCorrect="false"
           style={styles.input}
+          onChangeText={(value) => setEmail(value)}
         />
         <TextInput
           placeholder="Senha"
           autoCorrect="false"
           secureTextEntry="true"
           style={styles.input}
+          onChangeText={(value) => setPassword(value)}
         />
 
-        <TouchableOpacity style={styles.btnCadastrar}>
+        <TouchableOpacity style={styles.btnCadastrar} onPress={cadastrar}>
           <Text style={styles.btnTextCadastrar}>Cadastrar</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.btnVoltar}>
+        <TouchableOpacity
+          style={styles.btnVoltar}
+          onPress={() => navigation.navigate('login')}
+        >
           <Text style={styles.btnTextVoltar}>Voltar a tela de Login</Text>
         </TouchableOpacity>
       </View>
@@ -96,5 +148,3 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
 })
-
-export default Register

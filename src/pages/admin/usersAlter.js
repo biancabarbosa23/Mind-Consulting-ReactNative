@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   StyleSheet,
   View,
@@ -7,14 +7,66 @@ import {
   TouchableOpacity,
   Text,
   SafeAreaView,
+  AsyncStorage,
+  Alert,
 } from 'react-native'
+import { useNavigation } from '@react-navigation/native'
+import api from '../../services/api'
 
 import { AntDesign } from '@expo/vector-icons'
 
-function UsersAlter() {
+function UsersAlter({ navigation }) {
+  const [name, setName] = useState('')
+  const [cpf, setCpf] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [level, setLevel] = useState('')
   const [edit, setEdit] = useState(false)
   const [show, setShow] = useState(false)
+  const [user, setUser] = useState('')
 
+  useEffect(() => {
+    (async () => {
+      const token = await AsyncStorage.getItem('@CodeApi:token')
+      const user = JSON.parse(await AsyncStorage.getItem('@CodeApi:user'))
+      setUser(user)
+      setName(user.name)
+      setCpf(user.cpf)
+      setEmail(user.email)
+      setPassword(user.password)
+      setLevel(user.level)
+    })()
+  }, [])
+
+  async function atualizar() {
+    try {
+      const id = user._id
+
+      if (password === '') {
+        const response = await api.put('/application/' + id, {
+          name,
+          cpf,
+          email,
+          level,
+        })
+
+      } else {
+        const response = await api.put('/application/' + id, {
+          name,
+          cpf,
+          email,
+          level,
+          password,
+        })
+      }
+
+
+      Alert.alert('Alterado com sucesso! ')
+
+    } catch (err) {
+
+    }
+  }
   return (
     <SafeAreaView style={styles.screen}>
       <View style={styles.divLogo}>
@@ -48,36 +100,36 @@ function UsersAlter() {
         </View>
         <View style={styles.infoUser}>
           <TextInput
-            value="Bianca Alves Barbosa"
             autoCorrect="false"
             editable={edit}
             style={styles.input}
-          />
+            onChangeText={(value) => setName(value)}
+          >{name}</TextInput>
           <TextInput
-            value="12312312345"
             autoCorrect="false"
             editable={edit}
             style={styles.input}
-          />
+            onChangeText={(value) => setCpf(value)}
+          >{cpf}</TextInput>
           <TextInput
-            value="bianca@hotmail.com"
             autoCorrect="false"
             editable={edit}
             style={styles.input}
-          />
+            onChangeText={(value) => setEmail(value)}
+          >{email}</TextInput>
           <TextInput
-            value="1"
             autoCorrect="false"
             editable={edit}
             style={styles.input}
-          />
+            onChangeText={(value) => setLevel(value)}
+          >{level}</TextInput>
           <TextInput
-            value="12345"
             autoCorrect="false"
             editable={edit}
             secureTextEntry="true"
             style={styles.input}
-          />
+            onChangeText={(value) => setPassword(value)}
+          >{password}</TextInput>
         </View>
       </View>
       <View style={styles.divButton}>
@@ -86,20 +138,19 @@ function UsersAlter() {
             style={styles.btnSalvar}
             onPress={() => {
               setEdit(false), setShow(false)
-            }}
+            }, atualizar}
           >
             <Text style={styles.btnText}>Salvar Alterações</Text>
           </TouchableOpacity>
-        ) : (
-          false
-        )}
-        <TouchableOpacity style={styles.btnVoltar}>
+        ) : (false)}
+        <TouchableOpacity style={styles.btnVoltar} onPress={() => navigation.navigate('administrador')}>
           <Text style={styles.btnText}>Voltar</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
   )
 }
+
 
 const styles = StyleSheet.create({
   screen: {
@@ -110,13 +161,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#191919',
     justifyContent: 'center',
     alignItems: 'center',
-    height: 110,
+    height: 80,
     width: '100%',
   },
   header: {
     flex: 1,
     width: '90%',
-    maxHeight: 140,
+    maxHeight: 135,
     justifyContent: 'flex-start',
     marginTop: 10,
   },
@@ -125,8 +176,8 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     borderStyle: 'solid',
     borderWidth: 3,
-    maxWidth: 110,
-    maxHeight: 110,
+    maxWidth: 100,
+    maxHeight: 100,
     borderRadius: 100,
   },
   icon: {
@@ -138,7 +189,7 @@ const styles = StyleSheet.create({
   divInfo: {
     flex: 1,
     width: '90%',
-    maxHeight: 265,
+    maxHeight: 260,
     flexDirection: 'row',
     justifyContent: 'flex-start',
     marginTop: 20,
@@ -165,7 +216,7 @@ const styles = StyleSheet.create({
     flex: 1,
     width: '100%',
     alignItems: 'center',
-    maxHeight: 150,
+    maxHeight: 140,
     marginTop: 20,
   },
   btnVoltar: {

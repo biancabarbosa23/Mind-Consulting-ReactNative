@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   StyleSheet,
   View,
@@ -6,9 +6,21 @@ import {
   TouchableOpacity,
   Text,
   SafeAreaView,
+  AsyncStorage,
 } from 'react-native'
+import { useNavigation } from '@react-navigation/native'
 
-function AdminDashboard() {
+function AdminDashboard({ navigation }) {
+  const [user, setUser] = useState('')
+
+  useEffect(() => {
+    (async () => {
+      const token = await AsyncStorage.getItem('@CodeApi:token')
+      const user = JSON.parse(await AsyncStorage.getItem('@CodeApi:user'))
+      setUser(user)
+    })()
+  }, [])
+
   return (
     <SafeAreaView style={styles.screen}>
       <View style={styles.divLogo}>
@@ -22,11 +34,11 @@ function AdminDashboard() {
           style={styles.imageUser}
           source={require('../../../assets/ImageUserExample.jpg')}
         />
-        <Text style={styles.name}>Bianca Alves Barbosa</Text>
+        <Text style={styles.name}>{user.name}</Text>
         <Text style={styles.status}>Administrador</Text>
       </View>
       <View style={styles.divButton}>
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('alterar')}>
           <Text style={styles.btnText}>Ver Perfil</Text>
         </TouchableOpacity>
 
@@ -34,7 +46,7 @@ function AdminDashboard() {
           <Text style={styles.btnText}>Ver todos usuários</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.btnSair}>
+        <TouchableOpacity style={styles.btnSair} onPress={() => navigation.navigate('Login')}>
           <Text style={styles.btnText}>Sair</Text>
         </TouchableOpacity>
       </View>

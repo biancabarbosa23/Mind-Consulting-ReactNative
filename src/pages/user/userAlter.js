@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   StyleSheet,
   View,
@@ -7,13 +7,63 @@ import {
   TouchableOpacity,
   Text,
   SafeAreaView,
+  AsyncStorage,
+  Alert,
 } from 'react-native'
-
 import { AntDesign } from '@expo/vector-icons'
 
-function UserAlter() {
+import api from '../../services/api'
+
+function UserAlter({ navigation }) {
+  const [name, setName] = useState('')
+  const [cpf, setCpf] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [edit, setEdit] = useState(false)
   const [show, setShow] = useState(false)
+  const [user, setUser] = useState('')
+
+  useEffect(() => {
+    (async () => {
+      const token = await AsyncStorage.getItem('@CodeApi:token')
+      const user = JSON.parse(await AsyncStorage.getItem('@CodeApi:user'))
+      setUser(user)
+      setName(user.name)
+      setCpf(user.cpf)
+      setEmail(user.email)
+      setPassword(user.password)
+    })()
+  }, [])
+
+  async function atualizar() {
+
+    try {
+      const id = user._id
+
+      if (password === '') {
+        const response = await api.put('/application/' + id, {
+          name,
+          cpf,
+          email,
+        })
+
+      } else {
+        const response = await api.put('/application/' + id, {
+          name,
+          cpf,
+          email,
+          password,
+        })
+      }
+      Alert.alert('Alterado com sucesso! ')
+
+      const { usuario } = response.data
+
+
+    } catch (err) {
+      Alert.alert('Falha ao atualizar')
+    }
+  }
 
   return (
     <SafeAreaView style={styles.screen}>
@@ -43,34 +93,35 @@ function UserAlter() {
           <Text>Nome: </Text>
           <Text>CPF: </Text>
           <Text>E-mail: </Text>
-          <Text>Senha: </Text>
+          {show ? (<Text>Senha: </Text>) : (false)}
         </View>
         <View style={styles.infoUser}>
           <TextInput
-            value="Bianca Alves Barbosa"
             autoCorrect="false"
             editable={edit}
             style={styles.input}
-          />
+            onChangeText={(value) => setName(value)}
+          >{name}</TextInput>
           <TextInput
-            value="12312312345"
             autoCorrect="false"
             editable={edit}
             style={styles.input}
-          />
+            onChangeText={(value) => setCpf(value)}
+          >{cpf}</TextInput>
           <TextInput
-            value="bianca@hotmail.com"
             autoCorrect="false"
             editable={edit}
             style={styles.input}
-          />
-          <TextInput
-            value="12345"
-            autoCorrect="false"
-            editable={edit}
-            secureTextEntry="true"
-            style={styles.input}
-          />
+            onChangeText={(value) => setEmail(value)}
+          >{email}</TextInput>
+          {show ? (
+            <TextInput
+              autoCorrect="false"
+              secureTextEntry="true"
+              style={styles.input}
+              onChangeText={(value) => setPassword(value)}
+            >{password}</TextInput>
+          ) : (false)}
         </View>
       </View>
       <View style={styles.divButton}>
@@ -79,14 +130,12 @@ function UserAlter() {
             style={styles.btnSalvar}
             onPress={() => {
               setEdit(false), setShow(false)
-            }}
+            }, atualizar}
           >
             <Text style={styles.btnText}>Salvar Alterações</Text>
           </TouchableOpacity>
-        ) : (
-          false
-        )}
-        <TouchableOpacity style={styles.btnVoltar}>
+        ) : (false)}
+        <TouchableOpacity style={styles.btnVoltar} onPress={() => navigation.navigate('perfil')}>
           <Text style={styles.btnText}>Voltar</Text>
         </TouchableOpacity>
       </View>
@@ -103,7 +152,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#191919',
     justifyContent: 'center',
     alignItems: 'center',
-    height: 110,
+    height: 90,
     width: '100%',
   },
   header: {
