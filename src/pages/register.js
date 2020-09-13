@@ -61,27 +61,23 @@ export default function Register({ navigation }) {
       <View style={styles.form}>
         <TextInput
           placeholder="Nome"
-          autoCorrect="false"
           style={styles.input}
           onChangeText={(value) => setName(value)}
         />
 
         <TextInput
           placeholder="CPF"
-          autoCorrect="false"
           style={styles.input}
           onChangeText={(value) => setCpf(value)}
         />
 
         <TextInput
           placeholder="E-mail"
-          autoCorrect="false"
           style={styles.input}
           onChangeText={(value) => setEmail(value)}
         />
         <TextInput
           placeholder="Senha"
-          autoCorrect="false"
           secureTextEntry="true"
           style={styles.input}
           onChangeText={(value) => setPassword(value)}

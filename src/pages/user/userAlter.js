@@ -40,24 +40,31 @@ function UserAlter({ navigation }) {
     try {
       const id = user._id
 
+      var response
+
       if (password === '') {
-        const response = await api.put('/application/' + id, {
+        response = await api.put('/application/' + id, {
           name,
           cpf,
           email,
         })
 
       } else {
-        const response = await api.put('/application/' + id, {
+        response = await api.put('/application/' + id, {
           name,
           cpf,
           email,
           password,
         })
       }
-      Alert.alert('Alterado com sucesso! ')
 
       const { usuario } = response.data
+
+      await AsyncStorage.setItem('@CodeApi:user', JSON.stringify(usuario))
+
+      Alert.alert('Alterado com sucesso! ')
+      setEdit(false)
+      setShow(false)
 
 
     } catch (err) {
@@ -97,26 +104,22 @@ function UserAlter({ navigation }) {
         </View>
         <View style={styles.infoUser}>
           <TextInput
-            autoCorrect="false"
             editable={edit}
             style={styles.input}
             onChangeText={(value) => setName(value)}
           >{name}</TextInput>
           <TextInput
-            autoCorrect="false"
             editable={edit}
             style={styles.input}
             onChangeText={(value) => setCpf(value)}
           >{cpf}</TextInput>
           <TextInput
-            autoCorrect="false"
             editable={edit}
             style={styles.input}
             onChangeText={(value) => setEmail(value)}
           >{email}</TextInput>
           {show ? (
             <TextInput
-              autoCorrect="false"
               secureTextEntry="true"
               style={styles.input}
               onChangeText={(value) => setPassword(value)}
@@ -128,14 +131,12 @@ function UserAlter({ navigation }) {
         {show ? (
           <TouchableOpacity
             style={styles.btnSalvar}
-            onPress={() => {
-              setEdit(false), setShow(false)
-            }, atualizar}
+            onPress={atualizar}
           >
             <Text style={styles.btnText}>Salvar Alterações</Text>
           </TouchableOpacity>
         ) : (false)}
-        <TouchableOpacity style={styles.btnVoltar} onPress={() => navigation.navigate('perfil')}>
+        <TouchableOpacity style={styles.btnVoltar} onPress={() => navigation.navigate('usuario')}>
           <Text style={styles.btnText}>Voltar</Text>
         </TouchableOpacity>
       </View>
@@ -152,7 +153,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#191919',
     justifyContent: 'center',
     alignItems: 'center',
-    height: 90,
+    height: '10%',
     width: '100%',
   },
   header: {
@@ -165,7 +166,6 @@ const styles = StyleSheet.create({
   imageUser: {
     flex: 1,
     alignSelf: 'center',
-    borderStyle: 'solid',
     borderWidth: 3,
     maxWidth: 110,
     maxHeight: 110,

@@ -9,6 +9,7 @@ import adminDashboard from './pages/admin/dashboard'
 import usersList from './pages/admin/usersList'
 import usersAlter from './pages/admin/usersAlter'
 
+//navegação em pilha
 const appNavigation = createStackNavigator({
   login: {
     screen: login,
@@ -25,7 +26,9 @@ const appNavigation = createStackNavigator({
   administrador: {
     screen: adminDashboard,
   },
-
+  listar: {
+    screen: usersList,
+  },
   alterar: {
     screen: usersAlter,
   },

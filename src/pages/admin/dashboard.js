@@ -32,7 +32,7 @@ function AdminDashboard({ navigation }) {
       <View style={styles.header}>
         <Image
           style={styles.imageUser}
-          source={require('../../../assets/ImageUserExample.jpg')}
+          source={require('../../../assets/ImageAdminExample.jpg')}
         />
         <Text style={styles.name}>{user.name}</Text>
         <Text style={styles.status}>Administrador</Text>
@@ -42,11 +42,11 @@ function AdminDashboard({ navigation }) {
           <Text style={styles.btnText}>Ver Perfil</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('listar')}>
           <Text style={styles.btnText}>Ver todos usuários</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.btnSair} onPress={() => navigation.navigate('Login')}>
+        <TouchableOpacity style={styles.btnSair} onPress={() => navigation.navigate('login')}>
           <Text style={styles.btnText}>Sair</Text>
         </TouchableOpacity>
       </View>
@@ -76,7 +76,6 @@ const styles = StyleSheet.create({
   imageUser: {
     flex: 1,
     alignSelf: 'center',
-    borderStyle: 'solid',
     borderWidth: 3,
     maxWidth: 110,
     maxHeight: 110,

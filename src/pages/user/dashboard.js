@@ -70,7 +70,6 @@ const styles = StyleSheet.create({
   imageUser: {
     flex: 1,
     alignSelf: 'center',
-    borderStyle: 'solid',
     borderWidth: 3,
     maxWidth: 110,
     maxHeight: 110,

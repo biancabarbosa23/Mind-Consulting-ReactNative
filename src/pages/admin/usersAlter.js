@@ -14,6 +14,7 @@ import { useNavigation } from '@react-navigation/native'
 import api from '../../services/api'
 
 import { AntDesign } from '@expo/vector-icons'
+import { NavigationContext } from 'react-navigation'
 
 function UsersAlter({ navigation }) {
   const [name, setName] = useState('')
@@ -42,8 +43,10 @@ function UsersAlter({ navigation }) {
     try {
       const id = user._id
 
+      var response
+
       if (password === '') {
-        const response = await api.put('/application/' + id, {
+        response = await api.put('/application/' + id, {
           name,
           cpf,
           email,
@@ -51,7 +54,7 @@ function UsersAlter({ navigation }) {
         })
 
       } else {
-        const response = await api.put('/application/' + id, {
+        response = await api.put('/application/' + id, {
           name,
           cpf,
           email,
@@ -59,12 +62,17 @@ function UsersAlter({ navigation }) {
           password,
         })
       }
-
-
       Alert.alert('Alterado com sucesso! ')
 
-    } catch (err) {
+      const { usuario } = response.data
 
+      await AsyncStorage.setItem('@CodeApi:user', JSON.stringify(usuario))
+
+      setEdit(false)
+      setShow(false)
+
+    } catch (err) {
+      Alert.alert('Não foi possível atualizar')
     }
   }
   return (
@@ -87,7 +95,7 @@ function UsersAlter({ navigation }) {
         </TouchableOpacity>
         <Image
           style={styles.imageUser}
-          source={require('../../../assets/ImageUserExample.jpg')}
+          source={require('../../../assets/ImageAdminExample.jpg')}
         />
       </View>
       <View style={styles.divInfo}>
@@ -100,31 +108,26 @@ function UsersAlter({ navigation }) {
         </View>
         <View style={styles.infoUser}>
           <TextInput
-            autoCorrect="false"
             editable={edit}
             style={styles.input}
             onChangeText={(value) => setName(value)}
           >{name}</TextInput>
           <TextInput
-            autoCorrect="false"
             editable={edit}
             style={styles.input}
             onChangeText={(value) => setCpf(value)}
           >{cpf}</TextInput>
           <TextInput
-            autoCorrect="false"
             editable={edit}
             style={styles.input}
             onChangeText={(value) => setEmail(value)}
           >{email}</TextInput>
           <TextInput
-            autoCorrect="false"
             editable={edit}
             style={styles.input}
             onChangeText={(value) => setLevel(value)}
           >{level}</TextInput>
           <TextInput
-            autoCorrect="false"
             editable={edit}
             secureTextEntry="true"
             style={styles.input}
@@ -136,9 +139,7 @@ function UsersAlter({ navigation }) {
         {show ? (
           <TouchableOpacity
             style={styles.btnSalvar}
-            onPress={() => {
-              setEdit(false), setShow(false)
-            }, atualizar}
+            onPress={atualizar}
           >
             <Text style={styles.btnText}>Salvar Alterações</Text>
           </TouchableOpacity>
@@ -174,7 +175,6 @@ const styles = StyleSheet.create({
   imageUser: {
     flex: 1,
     alignSelf: 'center',
-    borderStyle: 'solid',
     borderWidth: 3,
     maxWidth: 100,
     maxHeight: 100,

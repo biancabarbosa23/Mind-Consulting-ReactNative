@@ -21,10 +21,10 @@ export default function Login({ navigation }) {
 
   useEffect(() => {
     (async () => {
-      const token = await AsyncStorage.getItem('@CodeApi:token');
-      const user = JSON.parse(await AsyncStorage.getItem('@CodeApi:user'));
-    })();
-  });
+      const token = await AsyncStorage.getItem('@CodeApi:token')
+      const user = JSON.parse(await AsyncStorage.getItem('@CodeApi:user'))
+    })()
+  })
 
   async function logar() {
     //enviando o usuário e senha
@@ -37,21 +37,23 @@ export default function Login({ navigation }) {
       //pegando usuário e o token
       const { user, token } = response.data
 
-      //salvando user e o token no AsyncStorage
+      //setando user e o token no AsyncStorage
       await AsyncStorage.multiSet([
         ['@CodeApi:token', token],
         ['@CodeApi:user', JSON.stringify(user)],
       ])
 
-      if (user.level == 1) {
+
+      if (user.level === 1) {
         navigation.navigate('usuario')
-      } else if (user.level == 999) {
+      } else if (user.level === 999) {
         navigation.navigate('administrador')
       } else {
-        Alert.alert('Usuario desativado!')
+        Alert.alert('Usuário desativado!')
       }
+
     } catch (err) {
-      Alert.alert('Usuario ou senha incorreta!')
+      Alert.alert('Usuário ou senha incorretos')
     }
   }
 
@@ -66,15 +68,13 @@ export default function Login({ navigation }) {
       <View style={styles.form}>
         <TextInput
           placeholder="Insira seu E-mail ou CPF"
-          autoCorrect="false"
           style={styles.input}
           onChangeText={(value) => setUsuario(value)}
         />
         <TextInput
           placeholder="Senha"
-          autoCorrect="false"
-          secureTextEntry="true"
           style={styles.input}
+          secureTextEntry="true"
           onChangeText={(value) => setPassword(value)}
         />
 
@@ -101,7 +101,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#191919',
     justifyContent: 'center',
     alignItems: 'center',
-    height: 200,
+    height: '25%',
     width: '100%',
   },
   form: {
@@ -109,6 +109,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     width: '90%',
+    marginTop: 20,
   },
   input: {
     backgroundColor: '#dddd',
