@@ -19,7 +19,7 @@ function AdminDashboard({ navigation }) {
       const user = JSON.parse(await AsyncStorage.getItem('@CodeApi:user'))
       setUser(user)
     })()
-  }, [])
+  })
 
   return (
     <SafeAreaView style={styles.screen}>
@@ -38,7 +38,7 @@ function AdminDashboard({ navigation }) {
         <Text style={styles.status}>Administrador</Text>
       </View>
       <View style={styles.divButton}>
-        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('alterar')}>
+        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('perfil')}>
           <Text style={styles.btnText}>Ver Perfil</Text>
         </TouchableOpacity>
 

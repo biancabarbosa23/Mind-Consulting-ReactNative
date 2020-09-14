@@ -11,6 +11,7 @@ import {
   Alert,
 } from 'react-native'
 import { AntDesign } from '@expo/vector-icons'
+import { TextInputMask } from 'react-native-masked-text'
 
 import api from '../../services/api'
 
@@ -19,6 +20,7 @@ function UserAlter({ navigation }) {
   const [cpf, setCpf] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [cpfField, setCpfField] = useState(false)
   const [edit, setEdit] = useState(false)
   const [show, setShow] = useState(false)
   const [user, setUser] = useState('')
@@ -42,34 +44,44 @@ function UserAlter({ navigation }) {
 
       var response
 
-      if (password === '') {
-        response = await api.put('/application/' + id, {
-          name,
-          cpf,
-          email,
-        })
+      if (cpfField.isValid()) {
+        if (password === '') {
+          response = await api.put('/application/' + id, {
+            name,
+            "cpf": cpfField.getRawValue(),
+            email,
+          })
 
+        } else {
+          response = await api.put('/application/' + id, {
+            name,
+            "cpf": cpfField.getRawValue(),
+            email,
+            password,
+          })
+        }
+
+        const { usuario } = response.data
+
+        await AsyncStorage.setItem('@CodeApi:user', JSON.stringify(usuario))
+
+        Alert.alert('Alterado com sucesso! ')
+        setEdit(false)
+        setShow(false)
       } else {
-        response = await api.put('/application/' + id, {
-          name,
-          cpf,
-          email,
-          password,
-        })
+        Alert.alert('CPF invalido')
       }
-
-      const { usuario } = response.data
-
-      await AsyncStorage.setItem('@CodeApi:user', JSON.stringify(usuario))
-
-      Alert.alert('Alterado com sucesso! ')
-      setEdit(false)
-      setShow(false)
-
 
     } catch (err) {
       Alert.alert('Falha ao atualizar')
     }
+  }
+
+  function voltar() {
+    if (user.level === 999)
+      navigation.navigate('administrador')
+    else
+      navigation.navigate('usuario')
   }
 
   return (
@@ -108,11 +120,17 @@ function UserAlter({ navigation }) {
             style={styles.input}
             onChangeText={(value) => setName(value)}
           >{name}</TextInput>
-          <TextInput
-            editable={edit}
+          <TextInputMask
+            placeholder="CPF"
+            type={'cpf'}
             style={styles.input}
-            onChangeText={(value) => setCpf(value)}
-          >{cpf}</TextInput>
+            onChangeText={(text, ref = null) => {
+              setCpf(text);
+            }}
+            ref={(ref) => {
+              setCpfField(ref);
+            }}
+          ></TextInputMask>
           <TextInput
             editable={edit}
             style={styles.input}
@@ -136,11 +154,11 @@ function UserAlter({ navigation }) {
             <Text style={styles.btnText}>Salvar Alterações</Text>
           </TouchableOpacity>
         ) : (false)}
-        <TouchableOpacity style={styles.btnVoltar} onPress={() => navigation.navigate('usuario')}>
+        <TouchableOpacity style={styles.btnVoltar} onPress={voltar}>
           <Text style={styles.btnText}>Voltar</Text>
         </TouchableOpacity>
       </View>
-    </SafeAreaView>
+    </SafeAreaView >
   )
 }
 

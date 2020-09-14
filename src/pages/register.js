@@ -10,8 +10,7 @@ import {
   Alert,
   AsyncStorage,
 } from 'react-native'
-import { useNavigation } from '@react-navigation/native'
-
+import { TextInputMask } from 'react-native-masked-text'
 import api from '../services/api'
 
 export default function Register({ navigation }) {
@@ -19,41 +18,46 @@ export default function Register({ navigation }) {
   const [cpf, setCpf] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState(null)
+  const [cpfField, setCpfField] = useState('')
+
 
   async function cadastrar() {
-    //enviando o formulario
+    //enviando o formulário
+
     try {
-      const response = await api.post('/auth/cadastro', {
-        name,
-        cpf,
-        email,
-        password,
-        level: 1,
-      })
+      if (cpfField.isValid()) {
+        const response = await api.post('/auth/cadastro', {
+          name,
+          "cpf": cpfField.getRawValue(),
+          email,
+          password,
+          level: 1,
+        })
 
-      const { newUser, token } = response.data
+        const { newUser, token } = response.data
 
 
-      //salvando user e o token no AsyncStorage
-      await AsyncStorage.multiSet([
-        ['@CodeApi:token', token],
-        ['@CodeApi:user', JSON.stringify(newUser)],
-      ])
+        //salvando user e o token no AsyncStorage
+        await AsyncStorage.multiSet([
+          ['@CodeApi:token', token],
+          ['@CodeApi:user', JSON.stringify(newUser)],
+        ])
 
-      Alert.alert('Cadastrado com sucesso ')
+        Alert.alert('Cadastrado com sucesso ')
 
-      navigation.navigate('usuario')
+        navigation.navigate('usuario')
+      } else {
+        Alert.alert('Cpf invalido')
+      }
     } catch (response) {
-      setError(response.data.error)
-      Alert.alert(error)
+      Alert.alert('Não foi possível registrar')
     }
   }
 
   return (
     <SafeAreaView style={styles.screen}>
       <View style={styles.divLogo}>
-        <Image
+        <Image onPress={ImagePickerCall}
           style={styles.logo}
           source={require('../../assets/Mind-Branco.png')}
         />
@@ -65,10 +69,17 @@ export default function Register({ navigation }) {
           onChangeText={(value) => setName(value)}
         />
 
-        <TextInput
+        <TextInputMask
           placeholder="CPF"
+          type={'cpf'}
+          value={cpf}
           style={styles.input}
-          onChangeText={(value) => setCpf(value)}
+          onChangeText={(text, ref = null) => {
+            setCpf(text);
+          }}
+          ref={(ref) => {
+            setCpfField(ref);
+          }}
         />
 
         <TextInput

@@ -10,27 +10,29 @@ import {
   AsyncStorage,
   Alert,
 } from 'react-native'
-import { useNavigation } from '@react-navigation/native'
+import { TextInputMask } from 'react-native-masked-text'
+
 import api from '../../services/api'
 
 import { AntDesign } from '@expo/vector-icons'
-import { NavigationContext } from 'react-navigation'
+
 
 function UsersAlter({ navigation }) {
+  const [id, setId] = useState('')
   const [name, setName] = useState('')
   const [cpf, setCpf] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [level, setLevel] = useState('')
+  const [cpfField, setCpfField] = useState('')
   const [edit, setEdit] = useState(false)
   const [show, setShow] = useState(false)
   const [user, setUser] = useState('')
 
   useEffect(() => {
     (async () => {
-      const token = await AsyncStorage.getItem('@CodeApi:token')
-      const user = JSON.parse(await AsyncStorage.getItem('@CodeApi:user'))
-      setUser(user)
+      const user = JSON.parse(await AsyncStorage.getItem('@CodeApi:editUser'))
+      setId(user._id)
       setName(user.name)
       setCpf(user.cpf)
       setEmail(user.email)
@@ -41,35 +43,35 @@ function UsersAlter({ navigation }) {
 
   async function atualizar() {
     try {
-      const id = user._id
 
-      var response
+      if (cpfField.isValid()) {
+        if (password === '') {
+          await api.put('/application/' + id, {
+            name,
+            "cpf": cpfField.getRawValue(),
+            email,
+            level,
+          })
 
-      if (password === '') {
-        response = await api.put('/application/' + id, {
-          name,
-          cpf,
-          email,
-          level,
-        })
+        } else {
+          await api.put('/application/' + id, {
+            name,
+            "cpf": cpfField.getRawValue(),
+            email,
+            level,
+            password,
+          })
+        }
 
+        //const response = await api.get('/application/usuarios')
+        //await AsyncStorage.setItem('@CodeApi:users', JSON.stringify(response.data.users))
+
+        Alert.alert('Alterado com sucesso! ')
+        setEdit(false)
+        setShow(false)
       } else {
-        response = await api.put('/application/' + id, {
-          name,
-          cpf,
-          email,
-          level,
-          password,
-        })
+        Alert.alert('CPF invalido!')
       }
-      Alert.alert('Alterado com sucesso! ')
-
-      const { usuario } = response.data
-
-      await AsyncStorage.setItem('@CodeApi:user', JSON.stringify(usuario))
-
-      setEdit(false)
-      setShow(false)
 
     } catch (err) {
       Alert.alert('Não foi possível atualizar')
@@ -112,11 +114,18 @@ function UsersAlter({ navigation }) {
             style={styles.input}
             onChangeText={(value) => setName(value)}
           >{name}</TextInput>
-          <TextInput
-            editable={edit}
+          <TextInputMask
+            placeholder="CPF"
+            type={'cpf'}
+            value={cpf}
             style={styles.input}
-            onChangeText={(value) => setCpf(value)}
-          >{cpf}</TextInput>
+            onChangeText={(text, ref = null) => {
+              setCpf(text);
+            }}
+            ref={(ref) => {
+              setCpfField(ref);
+            }}
+          />
           <TextInput
             editable={edit}
             style={styles.input}
@@ -144,7 +153,7 @@ function UsersAlter({ navigation }) {
             <Text style={styles.btnText}>Salvar Alterações</Text>
           </TouchableOpacity>
         ) : (false)}
-        <TouchableOpacity style={styles.btnVoltar} onPress={() => navigation.navigate('administrador')}>
+        <TouchableOpacity style={styles.btnVoltar} onPress={() => navigation.navigate('listar')}>
           <Text style={styles.btnText}>Voltar</Text>
         </TouchableOpacity>
       </View>

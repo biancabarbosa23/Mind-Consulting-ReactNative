@@ -3,36 +3,26 @@ import {
     StyleSheet,
     View,
     Image,
-    TextInput,
-    TouchableOpacity,
     Text,
     SafeAreaView,
     AsyncStorage,
-    Alert,
     FlatList,
 } from 'react-native'
-import { useNavigation } from '@react-navigation/native'
 
-import listItems from '../../components/listItems'
 import api from '../../services/api'
 import ListItems from '../../components/listItems'
 
 
-function UsersList() {
+function UsersList({ navigation }) {
     const [users, setUsers] = useState('')
-    const [userId, setUserId] = useState('')
 
     useEffect(() => {
         (async () => {
-            const user = JSON.parse(await AsyncStorage.getItem('@CodeApi:user'))
-            setUserId(user._id)
-
-            const response = await api.get('/application/usuarios',
-                { id: userId }
-            )
-            setUsers(response.data.users)
+            const response = await api.get('/application/usuarios')
+            await AsyncStorage.setItem('@CodeApi:users', JSON.stringify(response.data.users))
+            setUsers(JSON.parse(await AsyncStorage.getItem('@CodeApi:users')))
         })()
-    })
+    }, [])
 
 
 
@@ -45,12 +35,12 @@ function UsersList() {
                 />
             </View>
             <Text style={styles.textInformativo}>
-                Arraste para a direita para desativar ou ativar um usuário</Text>
+                Arraste para a esquerda para desativar ou ativar um usuário</Text>
             <View style={styles.container}>
                 <FlatList
                     data={users}
                     keyExtractor={item => item._id}
-                    renderItem={({ item }) => (<ListItems data={item} />)}
+                    renderItem={({ item }) => (<ListItems data={item} navigation={navigation} />)}
                     ItemSeparatorComponent={() => <View backgroundColor="#181818" height={2} />}
                 />
             </View>
@@ -78,6 +68,7 @@ const styles = StyleSheet.create({
         fontSize: 15,
         marginBottom: 10,
         marginTop: 5,
+        alignSelf: 'center',
     },
 })
 

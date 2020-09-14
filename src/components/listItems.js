@@ -1,48 +1,67 @@
 import React, { useState } from 'react'
-import { View, Text, StyleSheet, TouchableOpacity, Image, Alert } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity, Image, Alert, AsyncStorage } from 'react-native'
 import Swipeable from 'react-native-gesture-handler/Swipeable'
+
 
 import api from '../services/api'
 
-function ListItem({ data }) {
-    const [users, setUsers] = useState(data)
+function ListItem({ data, navigation }) {
+    const [level, setLevel] = useState(data.level)
 
+    //desativar usuário
     async function desativar(idUser) {
+
         try {
-            Alert.alert('Alert', 'Deseja mesmo desativar esse usuário?', [
+            Alert.alert('Alerta', 'Deseja mesmo desativar esse usuário?', [
                 { text: 'Não', style: 'cancel' },
                 {
                     text: 'Sim', onPress: async () => {
-
-                        const response = await api.put('/application/' + idUser, {
+                        await api.put('/application/' + idUser, {
                             level: 0,
                         })
-
-
+                        setLevel(0)
                     }
-
                 },
             ])
         } catch (err) {
-            console.log(err)
+            Alert.alert('Não é possível desativar esse usuário')
         }
     }
 
-    async function ativar() {
+    //ativar usuário
+    async function ativar(idUser) {
+        try {
+            const usuarios = await api.put('/application/' + idUser, {
+                level: 1,
+            })
+            setLevel(1)
 
+        } catch (err) {
+            Alert.alert('Não é possível desativar esse usuário')
+        }
+    }
+
+    async function editar(user) {
+        try {
+            await AsyncStorage.setItem('@CodeApi:editUser', JSON.stringify(user))
+            navigation.navigate('alterar')
+
+        } catch (err) {
+            console.log(err)
+        }
     }
 
     function rightActions() {
         return (
 
             <View>
-                {data.level === 0 ?
-                    <TouchableOpacity style={styles.buttonAtivar} onPress={ativar()}>
+                {level === 0 ?
+                    <TouchableOpacity style={styles.buttonAtivar} onPress={() => ativar(data._id)}>
                         <Text style={styles.textButton}>Ativar</Text>
                     </TouchableOpacity>
 
                     :
-                    <TouchableOpacity style={styles.buttonDesativar} onPress={() => desativar(users._id)}>
+                    <TouchableOpacity style={styles.buttonDesativar} onPress={() => desativar(data._id)}>
                         <Text style={styles.textButton}>Desativar</Text>
                     </TouchableOpacity>
                 }
@@ -52,19 +71,19 @@ function ListItem({ data }) {
     }
 
     return (
-        <Swipeable renderRightActions={rightActions} >
-            <TouchableOpacity style={styles.container} >
+        <Swipeable renderRightActions={rightActions}>
+            <TouchableOpacity style={styles.container} onPress={() => editar(data)}>
                 <View style={styles.divImage}>
                     <Image style={styles.imageUser}
                         source={require('../../assets/ImageUserExample.jpg')} />
                 </View>
                 <View style={styles.divInfo}>
-                    <Text style={styles.text}>Nome: {users.name}</Text>
-                    <Text style={styles.text}>CPF: {users.cpf}</Text>
-                    {users.level === 0 ?
+                    <Text style={styles.text}>Nome: {data.name}</Text>
+                    <Text style={styles.text}>CPF: {data.cpf}</Text>
+                    {level === 0 ?
                         <Text style={styles.textDesativado}>Desativado</Text>
                         :
-                        <Text style={styles.text}>Nivel: {users.level}</Text>
+                        <Text style={styles.text}>Nivel: {level}</Text>
                     }
 
                 </View>
