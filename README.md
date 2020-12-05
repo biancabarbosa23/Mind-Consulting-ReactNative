@@ -17,7 +17,7 @@ Para executarmos o projeto é necessario que ter o Backend
  
 ### Iniciando 
 ```
-$ git clone https://github.com/biancabarbosa23/Mind-Consulting-Frontend.git
+$ git clone https://github.com/biancabarbosa23/Mind-Consulting-ReactNative.git
 ```
 ```
 $ npm install
